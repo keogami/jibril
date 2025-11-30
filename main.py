@@ -7,6 +7,8 @@ import typed_settings as ts
 import typer
 from loguru import logger
 
+from retrain import retrain
+
 # TODO: Add log file with a short retention, and another with compression that
 # is retained forever.
 # TODO: Add ability to register multiple paths to watch for organizing.
@@ -16,8 +18,9 @@ from loguru import logger
 @ts.settings
 class Config:
     target: Path = Path.home() / "jibril/"
+    # TODO convert this to enum https://typed-settings.readthedocs.io/en/latest/examples.html#the-code
     model_size: Literal["small", "medium", "large", "xlarge"] = "large"
-    ignore: [Path] = []
+    ignore: list[Path] = []
 
 
 def load_config() -> Config:
@@ -45,7 +48,7 @@ def daemon():
     logger.add(sys.stdout, format="{level} - <level>{message}</level>", level="DEBUG")
     config = load_config()
 
-    logger.info(f"Jibril is starting as a daemon for directory {config.directory}")
+    logger.info(f"Jibril is starting as a daemon for directory {config.target}")
 
     # TODO
     # - validate health
@@ -56,6 +59,8 @@ def daemon():
     # - setup whatever's need for graceful shutdown
     #
     # do whatever is needed to orchestrate all this
+
+    retrain()
 
 
 @app.command()
